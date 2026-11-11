@@ -1,0 +1,50 @@
+{
+    "name": "Magento",
+    "help": "Products: System > Data Transfer > Export, entity \"Products\" (images are file paths of the Magento server, not URLs, and are not mapped). Customers: entity \"Customers Main File\", then \"Customer Addresses\" with the same e-mail to add the address. Magento password hashes cannot be checked by GP247: customers reset their password. Orders: the order grid export has no line items; map the columns of an export that has them — the order statuses below are ready.",
+    "entities": {
+        "product": {
+            "columns": {
+                "sku": "sku",
+                "name": "name",
+                "short_description": "description",
+                "description": "content",
+                "meta_keywords": "keyword",
+                "price": "price",
+                "qty": "stock",
+                "weight": "weight",
+                "url_key": "alias"
+            }
+        },
+        "customer": {
+            "columns": {
+                "email": "email",
+                "_email": "email",
+                "firstname": "first_name",
+                "lastname": "last_name",
+                "street": "address1",
+                "city": "city",
+                "postcode": "postcode",
+                "country_id": "country",
+                "telephone": "phone",
+                "company": "company",
+                "password_hash": "password_hash"
+            }
+        },
+        "order": {
+            "columns": {},
+            "statuses": {
+                "status": {
+                    "pending": 1,
+                    "pending_payment": 1,
+                    "processing": 2,
+                    "holded": 3,
+                    "payment_review": 3,
+                    "fraud": 3,
+                    "canceled": 4,
+                    "complete": 5,
+                    "closed": 7
+                }
+            }
+        }
+    }
+}

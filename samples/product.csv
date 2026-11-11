@@ -1,0 +1,4 @@
+﻿sku,name,description,price,cost,stock,status,categories,brand,supplier,image
+TEA-001,Green tea 100 g,Loose leaf green tea.,8.5,4,120,1,CAT-TEA,BR-GREEN,SUP-01,https://example.com/images/tea-001.jpg
+TEA-002,Black tea 100 g,Loose leaf black tea.,7.9,3.6,80,1,CAT-TEA,BR-HILL,SUP-01,
+COF-001,Ground coffee 250 g,Medium roast.,12,6.5,60,1,CAT-COFFEE,BR-HILL,,

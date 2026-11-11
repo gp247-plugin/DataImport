@@ -1,0 +1,88 @@
+{
+    "name": "Shopify",
+    "help": "Products: Products > Export (one row per product; extra variant and image rows of the same Handle are reported as duplicates). Customers: Customers > Export. Orders: Orders > Export, one row per line item — the order fields are on the first row of each order. The export has no amount received, so a paid order is written as unpaid with a warning: add a \"received\" column to keep the payment.",
+    "entities": {
+        "product": {
+            "columns": {
+                "Handle": "key",
+                "Title": "name",
+                "Body (HTML)": "content",
+                "Tags": "tags",
+                "Variant SKU": "sku",
+                "Variant Price": "price",
+                "Variant Inventory Qty": "stock",
+                "Cost per item": "cost",
+                "Image Src": "images"
+            }
+        },
+        "customer": {
+            "columns": {
+                "First Name": "first_name",
+                "Last Name": "last_name",
+                "Email": "email",
+                "Company": "company",
+                "Address1": "address1",
+                "Address2": "address2",
+                "City": "city",
+                "Zip": "postcode",
+                "Country Code": "country",
+                "Phone": "phone",
+                "Default Address Company": "company",
+                "Default Address Address1": "address1",
+                "Default Address Address2": "address2",
+                "Default Address City": "city",
+                "Default Address Zip": "postcode",
+                "Default Address Country Code": "country",
+                "Default Address Phone": "phone"
+            }
+        },
+        "order": {
+            "columns": {
+                "Name": "key",
+                "Email": "email",
+                "Financial Status": "payment_status",
+                "Fulfillment Status": "status",
+                "Currency": "currency",
+                "Subtotal": "subtotal",
+                "Shipping": "shipping",
+                "Taxes": "tax",
+                "Total": "total",
+                "Discount Amount": "discount",
+                "Shipping Method": "shipping_method",
+                "Created at": "created_at",
+                "Lineitem quantity": "line_qty",
+                "Lineitem name": "line_name",
+                "Lineitem price": "line_price",
+                "Lineitem sku": "line_sku",
+                "Lineitem discount": "line_discount",
+                "Billing Name": "first_name",
+                "Billing Company": "company",
+                "Billing Address1": "address1",
+                "Billing Address2": "address2",
+                "Billing City": "city",
+                "Billing Zip": "postcode",
+                "Billing Country": "country",
+                "Billing Phone": "phone",
+                "Payment Method": "payment_method",
+                "Notes": "comment"
+            },
+            "statuses": {
+                "status": {
+                    "fulfilled": 5,
+                    "unfulfilled": 2,
+                    "partial": 2,
+                    "restocked": 4
+                },
+                "payment_status": {
+                    "pending": 1,
+                    "authorized": 1,
+                    "voided": 1,
+                    "partially_paid": 2,
+                    "paid": 3,
+                    "partially_refunded": 3,
+                    "refunded": 4
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,34 @@
+{
+    "name": "WooCommerce",
+    "help": "Products: the CSV of Products > Export (built into WooCommerce). Categories are not mapped: WooCommerce writes them as \"Parent > Child\" names; import the categories first with their own file and add them to the products afterwards. Orders: WooCommerce has no built-in order CSV; map the columns of your export tool, the order statuses below are ready.",
+    "entities": {
+        "product": {
+            "columns": {
+                "SKU": "sku",
+                "Name": "name",
+                "Short description": "description",
+                "Description": "content",
+                "Regular price": "price",
+                "Stock": "stock",
+                "Weight (kg)": "weight",
+                "Tags": "tags",
+                "Images": "images"
+            }
+        },
+        "order": {
+            "columns": {},
+            "statuses": {
+                "status": {
+                    "pending": 1, "wc-pending": 1,
+                    "checkout-draft": 1, "wc-checkout-draft": 1,
+                    "processing": 2, "wc-processing": 2,
+                    "on-hold": 3, "wc-on-hold": 3,
+                    "cancelled": 4, "wc-cancelled": 4,
+                    "completed": 5, "wc-completed": 5,
+                    "failed": 6, "wc-failed": 6,
+                    "refunded": 7, "wc-refunded": 7
+                }
+            }
+        }
+    }
+}

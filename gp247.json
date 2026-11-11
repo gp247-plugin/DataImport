@@ -1,0 +1,30 @@
+{
+    "name": "Data Import",
+    "image": "images/import.png",
+    "auth": "GP247",
+    "email": "support@gp247.net",
+    "link": "https://GP247.net",
+    "configGroup": "Plugins",
+    "configCode": "Other",
+    "configKey": "DataImport",
+    "version": "1.0.0",
+    "requireCore": [
+        "3.12"
+    ],
+    "minUpdateFrom": "1.0.0",
+    "requireComposerPackages": [
+        "gp247/shop"
+    ],
+    "requireGp247Extensions": [],
+    "requireLivewire": true,
+    "storeScope": "global",
+    "dataTables": {
+        "tables": [
+            "data_import_job",
+            "data_import_map",
+            "data_import_undo",
+            "data_import_mapping_preset"
+        ],
+        "help": "Import runs, the source-to-GP247 id map and the undo log of the Data Import plugin."
+    }
+}

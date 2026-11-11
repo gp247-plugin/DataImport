@@ -1,0 +1,4 @@
+﻿key,name,alias,parent,sort,status
+CAT-DRINK,Drinks,drinks,,1,1
+CAT-TEA,Tea,tea,CAT-DRINK,2,1
+CAT-COFFEE,Coffee,coffee,CAT-DRINK,3,1
