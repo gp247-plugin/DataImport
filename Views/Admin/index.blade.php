@@ -6,8 +6,9 @@
     @aidlc-unit data-import
     @aidlc-story US-data-import-access-control
     @aidlc-story US-data-import-upload-source
+    @aidlc-story US-data-import-file-format-guide
 
-    Variables: $jobs (paginator of ImportJob), $entities (entity => label), $phases, $showStore, $maxBytes.
+    Variables: $jobs (paginator of ImportJob), $entities (entity => label), $phases, $showStore, $maxBytes, $format (FileFormat::for() of the chosen kind, or null).
 --}}
 @php($l = 'Plugins/DataImport::lang.')
 @php($inputCls = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100')
@@ -19,7 +20,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label class="block text-sm text-gray-700 dark:text-gray-200">
                     <span class="mb-1 block font-medium">{{ gp247_language_render($l.'field_entity') }}</span>
-                    <select wire:model="entity" class="{{ $inputCls }}" data-testid="data-import-index-entity">
+                    <select wire:model.live="entity" class="{{ $inputCls }}" data-testid="data-import-index-entity">
                         @foreach ($entities as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
                         @endforeach
@@ -32,9 +33,12 @@
                 </label>
             </div>
             <div class="mt-4">
-                @include('Plugins/DataImport::Admin.partials.uploader', ['resumeJobId' => null, 'testid' => 'data-import-index-upload', 'inputCls' => $inputCls])
+                @include('Plugins/DataImport::Admin.partials.uploader', ['resumeJobId' => null, 'testid' => 'data-import-index-upload', 'inputCls' => $inputCls, 'maxBytes' => $maxBytes])
             </div>
             <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">{{ gp247_language_render($l.'import_order') }}</p>
+            @if ($format !== null)
+                @include('Plugins/DataImport::Admin.partials.file_format', ['format' => $format, 'entityLabel' => $entities[$format['entity']] ?? $format['entity'], 'l' => $l])
+            @endif
         </x-gp247::card>
     @else
         <x-gp247::alert type="info" data-testid="data-import-index-readonly">{{ gp247_language_render($l.'readonly_hint') }}</x-gp247::alert>

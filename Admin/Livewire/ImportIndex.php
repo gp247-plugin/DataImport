@@ -3,6 +3,7 @@
 namespace App\GP247\Plugins\DataImport\Admin\Livewire;
 
 use App\GP247\Plugins\DataImport\Admin\Livewire\Concerns\ReceivesFileParts;
+use App\GP247\Plugins\DataImport\Application\FileFormat;
 use App\GP247\Plugins\DataImport\Application\Handlers;
 use App\GP247\Plugins\DataImport\Application\ImportRejected;
 use App\GP247\Plugins\DataImport\Application\ImportService;
@@ -20,7 +21,7 @@ use Livewire\WithPagination;
  * kind of data, source name, file — sent in parts.
  *
  * @aidlc-unit data-import
- * @aidlc-story US-data-import-access-control, US-data-import-upload-source
+ * @aidlc-story US-data-import-access-control, US-data-import-upload-source, US-data-import-file-format-guide
  */
 class ImportIndex extends GP247AdminComponent
 {
@@ -93,6 +94,28 @@ class ImportIndex extends GP247AdminComponent
     }
 
     /**
+     * Download the sample file of the chosen kind of data — only a kind the admin may import.
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     *
+     * @aidlc-unit data-import
+     * @aidlc-story US-data-import-file-format-guide
+     */
+    public function downloadSample()
+    {
+        Access::authorize(Handlers::group($this->entity), 'new', 'downloadSample');
+        // WHY: the entity comes from the browser; only a known kind the admin may import names a file.
+        if (!in_array($this->entity, Access::importableEntities(), true)) {
+            abort(404);
+        }
+        $path = FileFormat::samplePath($this->entity);
+
+        return response()->streamDownload(static function () use ($path): void {
+            readfile($path);
+        }, basename($path), ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
      * A new filter starts on the first page.
      *
      * @return void
@@ -125,6 +148,7 @@ class ImportIndex extends GP247AdminComponent
             'phases' => $phases,
             'showStore' => Access::isRoot() && function_exists('gp247_store_check_multi_domain_installed') && gp247_store_check_multi_domain_installed(),
             'maxBytes' => ImportService::maxBytes(),
+            'format' => isset($entities[$this->entity]) ? FileFormat::for($this->entity) : null,
         ])->layout('gp247-admin::layouts.admin', ['title' => gp247_language_render($l . 'title')]);
     }
 }

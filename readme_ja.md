@@ -111,6 +111,9 @@ php artisan gp247:ext-install --type=plugin --key=DataImport
 
 **カテゴリ → ブランド → 仕入先 → 商品 → 顧客 → 注文**
 
+**データインポート** 画面でデータの種類を選ぶと、**ファイル形式** の枠がすぐに表示されます。受け付ける列、必須の列、意味、例、
+**サンプルファイルをダウンロード（CSV）** ボタンがあるので、ファイルを準備するときにこのドキュメントを開く必要はありません。
+
 [`samples/`](./samples) フォルダーにデータの種類ごとのサンプルファイルがあります（BOM 付き CSV UTF-8 — Excel で正しい文字で開けます）。
 列名は GP247 のフィールド名なので、列の対応付けは不要です。
 [`category.csv`](./samples/category.csv) · [`brand.csv`](./samples/brand.csv) · [`supplier.csv`](./samples/supplier.csv) ·
@@ -342,4 +345,4 @@ MIT — 無料です。
 
 ---
 
-<sub>📅 **最終更新:** 2026-11-11 · ✍️ **作成者 (Author):** GP247</sub>
+<sub>📅 **最終更新:** 2026-11-13 · ✍️ **作成者 (Author):** GP247</sub>

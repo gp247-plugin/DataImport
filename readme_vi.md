@@ -111,6 +111,9 @@ Nhập theo đúng thứ tự để cột tham chiếu (danh mục của sản p
 
 **danh mục → thương hiệu → nhà cung cấp → sản phẩm → khách hàng → đơn hàng**
 
+Trên màn **Nhập dữ liệu**, chọn loại dữ liệu là thấy ngay khung **Định dạng file**: các cột nhận được, cột bắt buộc, ý nghĩa, ví dụ và nút
+**Tải file mẫu (CSV)** — không cần mở tài liệu này khi chuẩn bị file.
+
 Thư mục [`samples/`](./samples) có một file mẫu cho từng loại dữ liệu (CSV UTF-8 có BOM — Excel mở đúng chữ). Tiêu đề cột là tên
 trường GP247 nên không cần ghép cột:
 [`category.csv`](./samples/category.csv) · [`brand.csv`](./samples/brand.csv) · [`supplier.csv`](./samples/supplier.csv) ·
@@ -340,4 +343,4 @@ Các luật dưới đây giữ cho dữ liệu cửa hàng không bị hỏng h
 
 ---
 
-<sub>📅 **Cập nhật lần cuối:** 2026-11-11 · ✍️ **Tác giả (Author):** GP247</sub>
+<sub>📅 **Cập nhật lần cuối:** 2026-11-13 · ✍️ **Tác giả (Author):** GP247</sub>

@@ -112,6 +112,9 @@ Import in this order so the reference columns (a product's categories, an order'
 
 **categories → brands → suppliers → products → customers → orders**
 
+On the **Data Import** screen, choosing a kind of data shows the **File format** panel right away: the columns it accepts, the required ones,
+what each means, an example and a **Download the sample file (CSV)** button — no need to open this guide while preparing a file.
+
 The [`samples/`](./samples) folder has one sample file per kind of data (CSV UTF-8 with BOM — Excel opens it with the right letters).
 Its column headers are GP247 field names, so no column mapping is needed:
 [`category.csv`](./samples/category.csv) · [`brand.csv`](./samples/brand.csv) · [`supplier.csv`](./samples/supplier.csv) ·
@@ -344,4 +347,4 @@ These rules keep the shop's data from being broken or duplicated; knowing them b
 
 ---
 
-<sub>📅 **Last updated:** 2026-11-11 · ✍️ **Author:** GP247</sub>
+<sub>📅 **Last updated:** 2026-11-13 · ✍️ **Author:** GP247</sub>
