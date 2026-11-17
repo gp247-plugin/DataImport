@@ -93,11 +93,21 @@ Mục này đi qua tám bước của một đợt nhập trên màn **Nhập d�
 4. **Ánh xạ trạng thái** (chỉ đơn hàng) — màn liệt kê mỗi giá trị trạng thái trong file kèm số đơn có giá trị đó; gán từng giá trị với
    một trạng thái có sẵn của GP247.
 
+![Đợt nhập mới: loại dữ liệu, tên nguồn, vùng kéo thả file và định dạng file của loại đã chọn](docs/images/new-run.jpg)
+
+![Xem trước: bảng mã, dấu ngăn cột và các dòng đầu của file](docs/images/preview.jpg)
+
+![Ghép cột: cột đặt tên trùng trường GP247 tự được ghép](docs/images/mapping.jpg)
+
 ### Chặng 2 — Đọc và xem lại (chưa ghi gì)
 5. **Đọc và kiểm** — từng dòng được kiểm bằng **đúng quy tắc của màn admin**. **Giữ trang mở** trong lúc chạy; đóng trang thì công việc
    dừng, mở lại đợt là chạy tiếp từ chỗ đã dừng.
 6. **Xem lại** — thẻ tổng **Thêm / Sửa / Không đổi / Lỗi / Xung đột / Có cảnh báo**. Lọc dòng theo loại, tìm theo khoá, bấm **Chi tiết**
    để xem giá trị trước → sau từng trường, hoặc **tải báo cáo lỗi (CSV)** để sửa file rồi nhập lại.
+
+![Xem lại: bao nhiêu dòng sẽ thêm, sửa, giữ nguyên hoặc bị từ chối](docs/images/review-summary.jpg)
+
+![Chi tiết một dòng: giá trị trước và sau của từng trường; dòng bị từ chối nêu lý do](docs/images/review-details.jpg)
 
 ### Chặng 3 — Ghi và hoàn tác
 7. **Duyệt và ghi** — nếu còn dòng lỗi, đánh dấu **"Ghi các dòng hợp lệ, bỏ qua dòng lỗi"** mới ghi được. Tuỳ chọn **phát sự kiện đồng bộ**
@@ -105,6 +115,8 @@ Mục này đi qua tám bước của một đợt nhập trên màn **Nhập d�
 8. **Kết quả** — số bản ghi đã ghi, ghi chú khi ghi (ví dụ ảnh không tải được), và nút **Hoàn tác đợt này** dùng được trong 30 ngày.
 
 Nếu thành công, đợt chuyển sang trạng thái **Đã ghi** và dữ liệu xuất hiện ở các màn sản phẩm, khách hàng, đơn hàng như bình thường.
+
+![Quyết định: duyệt và ghi, hoặc huỷ đợt](docs/images/review-decision.jpg)
 
 ## Thứ tự nhập và file mẫu
 Nhập theo đúng thứ tự để cột tham chiếu (danh mục của sản phẩm, khách của đơn…) tìm thấy bản ghi đã nhập trước:

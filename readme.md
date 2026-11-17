@@ -93,11 +93,21 @@ This section walks through the eight steps of a run on the **Data Import** scree
 4. **Order statuses** (orders only) — the screen lists every status value of the file with the number of orders that have it; map each
    value to a status the shop already has.
 
+![New import: kind of data, source name, drop zone and the file format of the chosen kind](docs/images/new-run.jpg)
+
+![Preview: character set, column separator and the first lines of the file](docs/images/preview.jpg)
+
+![Column mapping: a column named like a GP247 field is mapped by itself](docs/images/mapping.jpg)
+
 ### Stage 2 — Read and review (nothing written yet)
 5. **Reading** — every line is checked with **the same rules as the admin screen**. **Keep the page open** while it runs; if you close it
    the work stops, and opening the run again continues where it stopped.
 6. **Review** — counts **Create / Update / No change / Refused / Conflict / With warning**. Filter the lines by kind, search a key, press
    **Details** to see the before → after value of each field, or **Download the error report (CSV)** to fix the file and import it again.
+
+![Review: what will be created, updated, left unchanged or refused](docs/images/review-summary.jpg)
+
+![Details of a line: before and after of each field; refused lines say why](docs/images/review-details.jpg)
 
 ### Stage 3 — Write and undo
 7. **Approve and write** — if refused lines remain, tick **"Write the valid lines and skip the … refused / conflicting line(s)"** to write.
@@ -106,6 +116,8 @@ This section walks through the eight steps of a run on the **Data Import** scree
    usable for 30 days.
 
 If it works, the run's state becomes **Written** and the data appears on the product, customer and order screens as usual.
+
+![Decision: approve and write, or cancel the run](docs/images/review-decision.jpg)
 
 ## Import order and sample files
 Import in this order so the reference columns (a product's categories, an order's customer…) find the records imported before:
