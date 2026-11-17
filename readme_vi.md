@@ -147,6 +147,7 @@ Mẫu ghép sẵn đã khớp với file xuất của từng nền tảng; mục
 | **WooCommerce** | Sản phẩm: *Products → Export* | Mẫu **không ghép cột `Categories`** (WooCommerce ghi danh mục dạng tên "Cha > Con"): nhập danh mục trước bằng file riêng, rồi thêm cột `categories` cho file sản phẩm. WooCommerce không có file CSV đơn hàng sẵn — ghép cột theo công cụ xuất bạn dùng; ánh xạ trạng thái đơn đã có sẵn. |
 | **Shopify** | Sản phẩm: *Products → Export*; khách: *Customers → Export*; đơn: *Orders → Export* | File đơn **không có số tiền đã thu**, nên đơn đã thanh toán được ghi là **chưa thanh toán kèm cảnh báo**. Muốn giữ thanh toán, thêm cột `received` trước khi nhập. Dòng biến thể / ảnh thêm của cùng Handle bị báo trùng khoá. |
 | **Magento** | *System → Data Transfer → Export*: "Products", "Customers Main File" | Ảnh là đường dẫn file trên máy chủ Magento nên không được ghép. Mã băm mật khẩu của Magento không dùng được — khách đặt lại mật khẩu. File xuất từ lưới đơn hàng không có dòng sản phẩm. |
+| **GP247 / S-Cart** (plugin Xuất dữ liệu) | *Hệ thống → Xuất dữ liệu*, bảng mã **UTF-8** | Cột tự khớp, không cần ghép. Nhập theo thứ tự danh mục → thương hiệu → nhà cung cấp → sản phẩm → khách → đơn, và chọn trạng thái đơn ở bước ánh xạ. Dấu `'` đầu ô (chống công thức) được tự bỏ khi nhập. Không nhập lại file đơn vào chính site đã xuất (đơn sẽ bị tạo trùng). |
 
 ## File lớn và giới hạn của hosting
 Mục này giúp bạn nhập file lớn trên hosting có giới hạn tải lên và thời gian chạy.

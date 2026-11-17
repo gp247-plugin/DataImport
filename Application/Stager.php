@@ -110,14 +110,23 @@ final class Stager
     }
 
     /**
-     * NFC (when ext-intl is there) and, for code / number cells, full-width → half-width.
+     * One apostrophe less on a cell protected against formulas, NFC (when ext-intl is there) and,
+     * for code / number cells, full-width → half-width.
      *
      * @param string $cell
      * @param bool $code
      * @return string
+     *
+     * @aidlc-unit data-import
+     * @aidlc-story US-data-import-staging-validation
      */
     private function normalise(string $cell, bool $code): string
     {
+        // WHY: spreadsheets, the error report and the Data Export plugin write "'=…" so the cell is never run as a
+        // formula; keeping the apostrophe would change the value on the way back in. Only that one guard character goes.
+        if (preg_match('/^\'[=+\-@\t\r]/', $cell)) {
+            $cell = substr($cell, 1);
+        }
         if (class_exists(\Normalizer::class) && !\Normalizer::isNormalized($cell, \Normalizer::FORM_C)) {
             $cell = (string) \Normalizer::normalize($cell, \Normalizer::FORM_C);
         }

@@ -124,6 +124,11 @@ class CategoryHandler extends EntityHandler
         foreach ($keys as $key) {
             $out[$key] = str_contains($key, ':') ? ($texts[$key] ?? '') : (string) ($category->{$key} ?? '');
         }
+        // WHY: older data marks a top-level category with parent "0", which the shop's CategoryWriter reads as top level too;
+        // compared raw it differs from an empty parent cell and an unchanged category would show as an update.
+        if (array_key_exists('parent', $out) && $out['parent'] === '0') {
+            $out['parent'] = '';
+        }
         if ($keys !== []) {
             $out['updated_at'] = (string) $category->updated_at;
         }
