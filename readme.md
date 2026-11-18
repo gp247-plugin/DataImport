@@ -40,6 +40,7 @@ flowchart TB
 - [Import order and sample files](#import-order-and-sample-files) — what to import first, sample files to start from
 - [Fields](#fields) — which column goes to which GP247 field
 - [Notes per platform](#notes-per-platform) — WooCommerce, Shopify, Magento
+- [Keep your search ranking](#keep-your-search-ranking) — SEO title, description, noindex and old links (301)
 - [Large files and hosting limits](#large-files-and-hosting-limits) — files of hundreds of MB, changing the defaults
 - [Import from the command line (VPS)](#import-from-the-command-line-vps) — a whole run without a browser
 - [Permissions](#permissions) — letting other people import
@@ -161,6 +162,23 @@ The ready-made mappings already match each platform's export; this section lists
 | **Shopify** | Products: *Products → Export*; customers: *Customers → Export*; orders: *Orders → Export* | The order file **has no amount received**, so a paid order is written as **unpaid, with a warning**. To keep the payment, add a `received` column before importing. Extra variant / image lines of the same Handle are reported as duplicate keys. |
 | **Magento** | *System → Data Transfer → Export*: "Products", "Customers Main File" | Images are file paths on the Magento server and are not mapped. Magento password hashes cannot be used — customers reset their password. The order grid export has no product lines. |
 | **GP247 / S-Cart** (Data Export plugin) | *System → Data export*, encoding **UTF-8** | Columns match with no mapping. Import in the order categories → brands → suppliers → products → customers → orders, and pick the order statuses on the mapping step. A leading `'` that protects a cell against formulas is removed on import. Do not import an orders file back into the site it came from (the orders would be created twice). |
+
+## Keep your search ranking
+Search engines know your products by their **old address** and show the **SEO title and description** written on the old shop. Data Import carries both over for products, categories and brands, so the move does not cost you visitors.
+
+| What | How it comes over | What you do |
+|---|---|---|
+| SEO title and description (per language) | Columns `seo_title`, `seo_description` (add `:vi`, `:ja`… for a language). The ready-made mappings already know Yoast SEO and Rank Math (WooCommerce), Shopify `SEO Title` / `SEO Description`, Magento `meta_title` / `meta_description`. | WooCommerce: tick **Export custom meta** in *Products → Export*, otherwise the file has no SEO columns. |
+| Hide from search engines | `seo_noindex`, `seo_nofollow` (`1` = yes), or Rank Math's `rank_math_robots` column. | Nothing. |
+| Old links | A **301** from the old address to the new one: Shopify `/products/<handle>` and Magento `/<url_key>.html` are built from the file; any platform: a column with the old URLs mapped to `legacy_url` (a full URL keeps only its path). | WooCommerce exports no product address: add a column with the old URLs (for example from a permalink export of WordPress) and map it to `legacy_url`. |
+
+Good to know:
+- An **empty cell never clears** an SEO value already set on the shop; canonical and share image are not imported (the old canonical points at the old address).
+- A title made only of template variables (`%%title%% %%sep%% %%sitename%%`) is not imported: your store's title template does that job. Known variables in a written title are filled in; an unknown one leaves the title out and the line shows a remark — no `%%…%%` ever reaches a search result.
+- An old address that is not on your site, already belongs to another product or is a page of the shop (cart, login…) gets no 301; the review counts them and each line says why.
+- The new 301s carry the label **Imported** on *SEO → Redirect 301*. Undoing the run removes them, except the ones you edited since.
+- After importing, open two or three old links in your browser to check that they land on the new pages.
+- Needs a GP247 front with SEO per content (and, for old links, a version with import redirects). On an older front these fields simply do not appear.
 
 ## Large files and hosting limits
 This section helps you import large files on hosting with upload and run-time limits.
@@ -360,4 +378,4 @@ These rules keep the shop's data from being broken or duplicated; knowing them b
 
 ---
 
-<sub>📅 **Last updated:** 2026-11-13 · ✍️ **Author:** GP247</sub>
+<sub>📅 **Last updated:** 2026-11-18 · ✍️ **Author:** GP247</sub>

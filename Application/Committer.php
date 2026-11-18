@@ -3,6 +3,7 @@
 namespace App\GP247\Plugins\DataImport\Application;
 
 use App\GP247\Plugins\DataImport\Application\Entity\CategoryHandler;
+use App\GP247\Plugins\DataImport\Application\Seo\SeoCarryover;
 use App\GP247\Plugins\DataImport\Domain\RowAction;
 use App\GP247\Plugins\DataImport\Models\IdMapEntry;
 use App\GP247\Plugins\DataImport\Models\ImportJob;
@@ -20,8 +21,9 @@ use Illuminate\Validation\ValidationException;
  * are the truth). A record changed after the review is not overwritten: the row becomes a conflict.
  *
  * @aidlc-unit data-import
- * @aidlc-story US-data-import-idempotent-commit, US-data-import-conflict-guard, US-data-import-id-mapping
- * @aidlc-adr data-import_id-map-exactly-once
+ * @aidlc-story US-data-import-idempotent-commit, US-data-import-conflict-guard, US-data-import-id-mapping,
+ *              US-data-import-seo-meta, US-data-import-legacy-url-redirect
+ * @aidlc-adr data-import_id-map-exactly-once, data-import_seo-carryover
  */
 final class Committer
 {
@@ -69,11 +71,11 @@ final class Committer
         [$values, $remarks] = $handler->beforeWrite($job, RowGroup::values($job, $handler, $row)['values']);
         $this->remember($job, $row, $remarks);
         try {
-            DB::connection(GP247_DB_CONNECTION)->transaction(function () use ($job, $handler, $ctx, $row, $keyHash, $values): void {
+            $redirect = DB::connection(GP247_DB_CONNECTION)->transaction(function () use ($job, $handler, $ctx, $row, $keyHash, $values): ?string {
                 $fresh = StagedRow::whereKey($row->id)->lockForUpdate()->first();
                 if ($fresh === null || $fresh->status !== StagedRow::STATUS_PENDING) {
                     // Written by an earlier slice that died before saving its cursor.
-                    return;
+                    return null;
                 }
                 $entry = IdMapEntry::findByHash($keyHash, true);
                 $targetId = $row->action === RowAction::UPDATE ? (string) $row->target_id : null;
@@ -85,6 +87,7 @@ final class Committer
                 if ($errors !== []) {
                     throw ValidationException::withMessages($errors);
                 }
+                [$flat] = SeoCarryover::resolve($handler->seoType(), $values, $flat, $job, $handler->languages());
                 $flat = $this->resolvePending($job, $flat);
                 $before = null;
                 if ($targetId !== null) {
@@ -93,11 +96,11 @@ final class Committer
                     if ($handler->version($job->store_id, $targetId, $keys) !== $row->target_version) {
                         throw new RowConflict('changed_since_review');
                     }
-                    $before = $handler->snapshot($job->store_id, $targetId, $keys);
+                    $before = $handler->state($job->store_id, $targetId, $keys);
                     unset($before['updated_at'], $before['password_hash']);
                 }
 
-                $model = $handler->save($ctx, $handler->payload($flat), $targetId);
+                $model = $handler->write($ctx, $handler->writePayload($flat), $targetId);
                 $id = (string) $model->getKey();
 
                 IdMapEntry::updateOrCreate(['key_hash' => $keyHash], [
@@ -110,8 +113,14 @@ final class Committer
                     'before' => $before, 'after_version' => $handler->version($job->store_id, $id, array_keys($before ?? $flat)),
                     'map_key_hash' => $targetId === null ? $keyHash : null, 'status' => UndoRecord::STATUS_PENDING,
                 ]);
+                $redirect = $this->redirect($job, $handler, $row, $values, $model);
                 $fresh->forceFill(['status' => StagedRow::STATUS_WRITTEN, 'target_id' => $id])->save();
+
+                return $redirect;
             });
+            if ($redirect !== null) {
+                $this->count($job, $redirect);
+            }
         } catch (ValidationException $e) {
             $row->forceFill(['status' => StagedRow::STATUS_FAILED, 'action' => RowAction::ERROR, 'errors' => $e->errors()])->save();
         } catch (RowConflict $e) {
@@ -148,6 +157,47 @@ final class Committer
         $cursor['write_warnings'] = $kept;
         $job->counts = $counts;
         $job->cursor = $cursor;
+    }
+
+    /**
+     * Write the 301 from the row's old address when the review planned one, with its undo record.
+     *
+     * @param ImportJob $job
+     * @param Entity\EntityHandler $handler
+     * @param StagedRow $row
+     * @param array<string, string> $values
+     * @param \Illuminate\Database\Eloquent\Model $model Written record.
+     * @return string|null Count to raise (`redirects` / `redirect_skipped`), null when none was planned.
+     *
+     * @aidlc-story US-data-import-legacy-url-redirect
+     */
+    private function redirect(ImportJob $job, Entity\EntityHandler $handler, StagedRow $row, array $values, $model): ?string
+    {
+        if (!array_key_exists(SeoCarryover::LEGACY_FIELD, (array) $row->diff) || !SeoCarryover::legacySupported($handler->seoType())) {
+            return null;
+        }
+        $written = SeoCarryover::redirect($handler->seoType(), $job->store_id, SeoCarryover::legacyPath($values, $job), (string) $model->alias);
+        if ($written === null) {
+            return 'redirect_skipped';
+        }
+        UndoRecord::create([
+            'job_id' => $job->id, 'entity' => $job->entity, 'target_id' => (string) $written['id'], 'kind' => UndoRecord::KIND_REDIRECT,
+            'before' => ['to' => $written['to']], 'after_version' => null, 'map_key_hash' => null, 'status' => UndoRecord::STATUS_PENDING,
+        ]);
+
+        return 'redirects';
+    }
+
+    /**
+     * @param ImportJob $job
+     * @param string $code
+     * @return void
+     */
+    private function count(ImportJob $job, string $code): void
+    {
+        $counts = (array) $job->counts;
+        $counts[$code] = (int) ($counts[$code] ?? 0) + 1;
+        $job->counts = $counts;
     }
 
     /**

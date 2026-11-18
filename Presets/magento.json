@@ -1,6 +1,6 @@
 {
     "name": "Magento",
-    "help": "Products: System > Data Transfer > Export, entity \"Products\" (images are file paths of the Magento server, not URLs, and are not mapped). Customers: entity \"Customers Main File\", then \"Customer Addresses\" with the same e-mail to add the address. Magento password hashes cannot be checked by GP247: customers reset their password. Orders: the order grid export has no line items; map the columns of an export that has them — the order statuses below are ready.",
+    "help": "Products: System > Data Transfer > Export, entity \"Products\" (images are file paths of the Magento server, not URLs, and are not mapped). Customers: entity \"Customers Main File\", then \"Customer Addresses\" with the same e-mail to add the address. Magento password hashes cannot be checked by GP247: customers reset their password. Meta title and description are kept; old product links /<url_key>.html get a 301 to the new address (put the full old URLs in an \"old URL\" column if your store used another suffix). Orders: the order grid export has no line items; map the columns of an export that has them — the order statuses below are ready.",
     "entities": {
         "product": {
             "columns": {
@@ -12,8 +12,11 @@
                 "price": "price",
                 "qty": "stock",
                 "weight": "weight",
-                "url_key": "alias"
-            }
+                "url_key": "alias",
+                "meta_title": "seo_title",
+                "meta_description": "seo_description"
+            },
+            "legacy_path": "/{alias}.html"
         },
         "customer": {
             "columns": {

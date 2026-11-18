@@ -12,7 +12,7 @@ use App\GP247\Plugins\DataImport\Models\StagedRow;
  * covers the plan the user actually saw.
  *
  * @aidlc-unit data-import
- * @aidlc-story US-data-import-change-review
+ * @aidlc-story US-data-import-change-review, US-data-import-legacy-url-redirect
  * @aidlc-adr data-import_staged-review-commit
  */
 final class Review
@@ -31,6 +31,10 @@ final class Review
         }
         $counts['written'] = StagedRow::where('job_id', $job->id)->where('status', StagedRow::STATUS_WRITTEN)->count();
         $counts['warned'] = StagedRow::where('job_id', $job->id)->whereIn('action', RowAction::WRITES)->whereNotNull('warnings')->count();
+        // SEO carry-over (US-data-import-legacy-url-redirect, US-data-import-seo-meta): the diff / warning keys are fixed words.
+        $counts['redirect_planned'] = StagedRow::where('job_id', $job->id)->whereIn('action', RowAction::WRITES)->where('diff', 'like', '%"legacy_url"%')->count();
+        $counts['redirect_unplanned'] = StagedRow::where('job_id', $job->id)->whereIn('action', RowAction::WRITES)->where('warnings', 'like', '%"legacy_skipped"%')->count();
+        $counts['seo_template'] = StagedRow::where('job_id', $job->id)->whereIn('action', RowAction::WRITES)->where('warnings', 'like', '%"seo_template"%')->count();
 
         return array_merge((array) $job->counts, $counts);
     }

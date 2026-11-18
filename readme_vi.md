@@ -40,6 +40,7 @@ flowchart TB
 - [Thứ tự nhập và file mẫu](#thứ-tự-nhập-và-file-mẫu) — nhập cái gì trước, file mẫu để bắt đầu
 - [Các trường](#các-trường) — cột nào ứng với trường nào của GP247
 - [Ghi chú theo nền tảng](#ghi-chú-theo-nền-tảng) — WooCommerce, Shopify, Magento
+- [Giữ thứ hạng tìm kiếm](#giữ-thứ-hạng-tìm-kiếm) — tiêu đề, mô tả SEO, noindex và link cũ (301)
 - [File lớn và giới hạn của hosting](#file-lớn-và-giới-hạn-của-hosting) — file vài trăm MB, đổi giá trị mặc định
 - [Nhập bằng dòng lệnh (VPS)](#nhập-bằng-dòng-lệnh-vps) — chạy trọn đợt không cần trình duyệt
 - [Quyền](#quyền) — giao việc nhập cho người khác
@@ -160,6 +161,23 @@ Mẫu ghép sẵn đã khớp với file xuất của từng nền tảng; mục
 | **Shopify** | Sản phẩm: *Products → Export*; khách: *Customers → Export*; đơn: *Orders → Export* | File đơn **không có số tiền đã thu**, nên đơn đã thanh toán được ghi là **chưa thanh toán kèm cảnh báo**. Muốn giữ thanh toán, thêm cột `received` trước khi nhập. Dòng biến thể / ảnh thêm của cùng Handle bị báo trùng khoá. |
 | **Magento** | *System → Data Transfer → Export*: "Products", "Customers Main File" | Ảnh là đường dẫn file trên máy chủ Magento nên không được ghép. Mã băm mật khẩu của Magento không dùng được — khách đặt lại mật khẩu. File xuất từ lưới đơn hàng không có dòng sản phẩm. |
 | **GP247 / S-Cart** (plugin Xuất dữ liệu) | *Hệ thống → Xuất dữ liệu*, bảng mã **UTF-8** | Cột tự khớp, không cần ghép. Nhập theo thứ tự danh mục → thương hiệu → nhà cung cấp → sản phẩm → khách → đơn, và chọn trạng thái đơn ở bước ánh xạ. Dấu `'` đầu ô (chống công thức) được tự bỏ khi nhập. Không nhập lại file đơn vào chính site đã xuất (đơn sẽ bị tạo trùng). |
+
+## Giữ thứ hạng tìm kiếm
+Công cụ tìm kiếm biết sản phẩm của bạn qua **địa chỉ cũ** và hiển thị **tiêu đề, mô tả SEO** viết ở cửa hàng cũ. Data Import mang cả hai sang cho sản phẩm, danh mục và thương hiệu, để việc chuyển nhà không làm mất khách.
+
+| Nội dung | Mang sang thế nào | Bạn cần làm gì |
+|---|---|---|
+| Tiêu đề và mô tả SEO (theo ngôn ngữ) | Cột `seo_title`, `seo_description` (thêm `:vi`, `:ja`… cho từng ngôn ngữ). Mẫu ghép sẵn đã biết Yoast SEO và Rank Math (WooCommerce), Shopify `SEO Title` / `SEO Description`, Magento `meta_title` / `meta_description`. | WooCommerce: tích **Export custom meta** ở *Products → Export*, nếu không file sẽ không có cột SEO. |
+| Ẩn khỏi công cụ tìm kiếm | `seo_noindex`, `seo_nofollow` (`1` = có), hoặc cột `rank_math_robots` của Rank Math. | Không cần làm gì. |
+| Link cũ | Redirect **301** từ địa chỉ cũ sang địa chỉ mới: Shopify `/products/<handle>` và Magento `/<url_key>.html` được dựng từ file; nền tảng nào cũng được: một cột URL cũ ghép vào `legacy_url` (URL đầy đủ chỉ giữ phần đường dẫn). | WooCommerce không xuất địa chỉ sản phẩm: thêm một cột URL cũ (ví dụ từ file xuất permalink của WordPress) rồi ghép vào `legacy_url`. |
+
+Cần biết:
+- **Ô trống không xoá** giá trị SEO đã đặt trên cửa hàng; canonical và ảnh chia sẻ không được nhập (canonical cũ trỏ về địa chỉ cũ).
+- Tiêu đề chỉ gồm biến mẫu (`%%title%% %%sep%% %%sitename%%`) không được nhập: mẫu tiêu đề của cửa hàng sẽ lo việc này. Biến quen thuộc trong tiêu đề có chữ được điền giá trị thật; biến lạ thì bỏ tiêu đề đó và dòng có ghi chú — chuỗi `%%…%%` không bao giờ lên kết quả tìm kiếm.
+- Địa chỉ cũ không thuộc site, đang là địa chỉ của sản phẩm khác hoặc là một trang của cửa hàng (giỏ hàng, đăng nhập…) thì không có 301; bước xem lại đếm số này và từng dòng ghi lý do.
+- Redirect 301 mới có nhãn **Nhập** ở *SEO → Redirect 301*. Hoàn tác đợt sẽ gỡ chúng, trừ redirect bạn đã sửa sau đó.
+- Nhập xong, mở thử vài link cũ trên trình duyệt để chắc chúng tới đúng trang mới.
+- Cần GP247 front có SEO theo nội dung (và, với link cũ, bản có redirect khi nhập). Front cũ hơn thì các trường này không hiện ra.
 
 ## File lớn và giới hạn của hosting
 Mục này giúp bạn nhập file lớn trên hosting có giới hạn tải lên và thời gian chạy.
@@ -356,4 +374,4 @@ Các luật dưới đây giữ cho dữ liệu cửa hàng không bị hỏng h
 
 ---
 
-<sub>📅 **Cập nhật lần cuối:** 2026-11-13 · ✍️ **Tác giả (Author):** GP247</sub>
+<sub>📅 **Cập nhật lần cuối:** 2026-11-18 · ✍️ **Tác giả (Author):** GP247</sub>

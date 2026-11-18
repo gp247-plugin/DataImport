@@ -24,6 +24,12 @@ class BrandHandler extends NamedRecordHandler
         return ['name', 'alias', 'image', 'url', 'sort', 'status'];
     }
 
+    /** @return string Brands have their own SEO values in the base. */
+    public function seoType(): ?string
+    {
+        return 'brand';
+    }
+
     protected function modelClass(): string
     {
         return ShopBrand::class;

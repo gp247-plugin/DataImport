@@ -57,6 +57,13 @@
             </div>
             @if ($preset !== '' && isset($presets[$preset]))
                 <x-gp247::alert type="info" data-testid="data-import-mapping-preset-help">{{ $presets[$preset]['help'] }}</x-gp247::alert>
+                {{-- Old addresses of the platform (US-data-import-legacy-url-redirect): the pattern the preset applies, or why there is none. --}}
+                @if (\App\GP247\Plugins\DataImport\Application\Seo\SeoCarryover::legacySupported(\App\GP247\Plugins\DataImport\Application\Handlers::for($job->entity)->seoType()))
+                    @php($legacyPattern = \App\GP247\Plugins\DataImport\Application\Presets::legacyPath($preset, $job->entity))
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-300" data-testid="data-import-mapping-legacy-pattern">
+                        {{ $legacyPattern !== '' ? gp247_language_render($l.'mapping.legacy_pattern', ['pattern' => $legacyPattern]) : gp247_language_render($l.'mapping.legacy_none') }}
+                    </p>
+                @endif
             @endif
             @if (count($presetMissing) > 0)
                 <x-gp247::alert type="warning" data-testid="data-import-mapping-preset-missing">{{ gp247_language_render($l.'mapping.preset_missing', ['columns' => implode(', ', $presetMissing)]) }}</x-gp247::alert>

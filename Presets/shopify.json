@@ -1,6 +1,6 @@
 {
     "name": "Shopify",
-    "help": "Products: Products > Export (one row per product; extra variant and image rows of the same Handle are reported as duplicates). Customers: Customers > Export. Orders: Orders > Export, one row per line item — the order fields are on the first row of each order. The export has no amount received, so a paid order is written as unpaid with a warning: add a \"received\" column to keep the payment.",
+    "help": "Products: Products > Export (one row per product; extra variant and image rows of the same Handle are reported as duplicates). Customers: Customers > Export. Orders: Orders > Export, one row per line item — the order fields are on the first row of each order. The export has no amount received, so a paid order is written as unpaid with a warning: add a \"received\" column to keep the payment. SEO title and description are kept; old product links /products/<handle> get a 301 to the new address.",
     "entities": {
         "product": {
             "columns": {
@@ -12,8 +12,11 @@
                 "Variant Price": "price",
                 "Variant Inventory Qty": "stock",
                 "Cost per item": "cost",
-                "Image Src": "images"
-            }
+                "Image Src": "images",
+                "SEO Title": "seo_title",
+                "SEO Description": "seo_description"
+            },
+            "legacy_path": "/products/{key}"
         },
         "customer": {
             "columns": {

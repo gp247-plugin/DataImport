@@ -1,6 +1,6 @@
 {
     "name": "WooCommerce",
-    "help": "Products: the CSV of Products > Export (built into WooCommerce). Categories are not mapped: WooCommerce writes them as \"Parent > Child\" names; import the categories first with their own file and add them to the products afterwards. Orders: WooCommerce has no built-in order CSV; map the columns of your export tool, the order statuses below are ready.",
+    "help": "Products: the CSV of Products > Export (built into WooCommerce). Categories are not mapped: WooCommerce writes them as \"Parent > Child\" names; import the categories first with their own file and add them to the products afterwards. Orders: WooCommerce has no built-in order CSV; map the columns of your export tool, the order statuses below are ready. SEO: tick \"Export custom meta\" in the exporter to get the Yoast SEO / Rank Math title, description and noindex. Old links: the export has no product address; add an \"old URL\" column (for example from a permalink export) to keep them with a 301.",
     "entities": {
         "product": {
             "columns": {
@@ -12,7 +12,14 @@
                 "Stock": "stock",
                 "Weight (kg)": "weight",
                 "Tags": "tags",
-                "Images": "images"
+                "Images": "images",
+                "Meta: _yoast_wpseo_title": "seo_title",
+                "Meta: _yoast_wpseo_metadesc": "seo_description",
+                "Meta: _yoast_wpseo_meta-robots-noindex": "seo_noindex",
+                "Meta: _yoast_wpseo_meta-robots-nofollow": "seo_nofollow",
+                "Meta: rank_math_title": "seo_title",
+                "Meta: rank_math_description": "seo_description",
+                "Meta: rank_math_robots": "seo_robots"
             }
         },
         "order": {

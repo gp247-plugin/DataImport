@@ -5,10 +5,12 @@
     @aidlc-unit data-import
     @aidlc-story US-data-import-undo
     @aidlc-story US-data-import-image-fetch
+    @aidlc-story US-data-import-legacy-url-redirect
+    @aidlc-story US-data-import-seo-meta
 --}}
 <x-gp247::card :title="gp247_language_render($l.'result.'.$job->phase)" data-testid="data-import-result-summary">
     <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
-        @foreach (['written', 'create', 'update', 'skip', 'error', 'conflict', 'warned', 'image_failed'] as $key)
+        @foreach (['written', 'create', 'update', 'skip', 'error', 'conflict', 'warned', 'image_failed', 'redirects', 'redirect_skipped'] as $key)
             @if (!empty($counts[$key]))
                 <div>
                     <dt class="text-xs text-gray-500 dark:text-gray-400">{{ gp247_language_render($l.'action.'.$key) }}</dt>
@@ -17,6 +19,11 @@
             @endif
         @endforeach
     </dl>
+
+    @if (!empty($counts['seo_template']))
+        {{-- US-data-import-seo-meta: titles / descriptions that were only template variables of the old SEO plugin. --}}
+        <p class="mt-4 text-sm text-gray-600 dark:text-gray-300" data-testid="data-import-result-seo-skipped">{{ gp247_language_render($l.'result.seo_skipped', ['count' => number_format((int) $counts['seo_template'])]) }}</p>
+    @endif
 
     @if (count($writeWarnings) > 0)
         <div class="mt-4" data-testid="data-import-result-warnings">

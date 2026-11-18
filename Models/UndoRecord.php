@@ -16,6 +16,9 @@ class UndoRecord extends Model
     public const KIND_CREATED = 'created';
     public const KIND_UPDATED = 'updated';
 
+    /** A 301 from the record's old address (target_id = redirect id, before.to = its target). */
+    public const KIND_REDIRECT = 'redirect';
+
     public const STATUS_PENDING = 'pending';
     public const STATUS_DONE = 'done';
     public const STATUS_KEPT = 'kept';

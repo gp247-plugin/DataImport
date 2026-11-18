@@ -2,6 +2,7 @@
 
 namespace App\GP247\Plugins\DataImport\Application\Entity;
 
+use App\GP247\Plugins\DataImport\Application\Seo\SeoCarryover;
 use App\GP247\Plugins\DataImport\Models\IdMapEntry;
 use App\GP247\Plugins\DataImport\Models\ImportJob;
 use GP247\Core\Models\AdminLanguage;
@@ -16,8 +17,12 @@ use Illuminate\Database\Eloquent\Model;
  * A flat set uses `field` for scalar values and `field:lang` for texts; it is what the review
  * diff, the undo log and the record fingerprint are built from.
  *
+ * The SEO values of the base (title / description per language, noindex, nofollow) are
+ * part of the flat set of entities that have an SEO content type (seoType()); they reach
+ * the base through SeoCarryover, never through the shop write service.
+ *
  * @aidlc-unit data-import
- * @aidlc-story US-data-import-catalog-entities, US-data-import-customers, US-data-import-id-mapping
+ * @aidlc-story US-data-import-catalog-entities, US-data-import-customers, US-data-import-id-mapping, US-data-import-seo-meta
  * @aidlc-adr data-import_write-path
  */
 abstract class EntityHandler
@@ -35,6 +40,24 @@ abstract class EntityHandler
     public function textFields(): array
     {
         return [];
+    }
+
+    /** @return string|null SEO content type of the base for this entity; null = no SEO values. */
+    public function seoType(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * The record itself, for a row that only changes SEO values (the shop service is not called).
+     *
+     * @param string $store
+     * @param string $id
+     * @return Model|null
+     */
+    public function find(string $store, string $id): ?Model
+    {
+        return null;
     }
 
     /** @return string Field that identifies a record in the store when it is not in the id map yet. */
@@ -223,7 +246,80 @@ abstract class EntityHandler
             }
         }
 
-        return $targets;
+        return array_merge($targets, SeoCarryover::targets($this->seoType(), $this->languages()));
+    }
+
+    /**
+     * The record's current flat values for $keys, SEO values included.
+     *
+     * @param string $store
+     * @param string $id
+     * @param array<int, string> $keys
+     * @return array<string, string>|null Null when the record is gone.
+     *
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function state(string $store, string $id, array $keys): ?array
+    {
+        $snapshot = $this->snapshot($store, $id, $keys);
+        if ($snapshot === null) {
+            return null;
+        }
+
+        return array_merge($snapshot, SeoCarryover::snapshot($this->seoType(), $id, $keys));
+    }
+
+    /**
+     * Payload for flat values: the shop service's part plus the SEO values carried aside.
+     *
+     * @param array<string, string> $flat
+     * @return array<string, mixed>
+     *
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function writePayload(array $flat): array
+    {
+        return SeoCarryover::attach($this->payload(SeoCarryover::withoutSeo($flat)), $flat);
+    }
+
+    /**
+     * Check a writePayload() without writing: shop rules, then the rules of the SEO screen.
+     *
+     * @param WriteContext $ctx
+     * @param array<string, mixed> $payload
+     * @param string|null $id
+     * @return array<string, array<int, string>>
+     *
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function check(WriteContext $ctx, array $payload, ?string $id): array
+    {
+        [$shop, $seo] = SeoCarryover::take($payload);
+        $errors = SeoCarryover::isEmptyPayload($shop) && $id !== null ? [] : $this->validate($ctx, $shop, $id);
+
+        return array_merge($errors, SeoCarryover::validate($this->seoType(), $seo, $id));
+    }
+
+    /**
+     * Write a writePayload(): the record through the shop service (skipped when only SEO
+     * values change), then its SEO values through the base — in the caller's transaction.
+     *
+     * @param WriteContext $ctx
+     * @param array<string, mixed> $payload
+     * @param string|null $id
+     * @return Model
+     * @throws \Illuminate\Validation\ValidationException
+     *
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function write(WriteContext $ctx, array $payload, ?string $id): Model
+    {
+        [$shop, $seo] = SeoCarryover::take($payload);
+        $model = ($id !== null && SeoCarryover::isEmptyPayload($shop)) ? $this->find($ctx->storeId, $id) : null;
+        $model ??= $this->save($ctx, $shop, $id);
+        SeoCarryover::write($this->seoType(), $model, $seo, $ctx->storeId);
+
+        return $model;
     }
 
     /**
@@ -237,7 +333,7 @@ abstract class EntityHandler
      */
     public function version(string $store, string $id, array $keys): ?string
     {
-        $snapshot = $this->snapshot($store, $id, $keys);
+        $snapshot = $this->state($store, $id, $keys);
         if ($snapshot === null) {
             return null;
         }

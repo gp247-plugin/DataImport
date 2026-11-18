@@ -2,10 +2,12 @@
 
 namespace App\GP247\Plugins\DataImport\Application;
 
+use App\GP247\Plugins\DataImport\Application\Seo\SeoCarryover;
 use App\GP247\Plugins\DataImport\Domain\RowAction;
 use App\GP247\Plugins\DataImport\Models\IdMapEntry;
 use App\GP247\Plugins\DataImport\Models\ImportJob;
 use App\GP247\Plugins\DataImport\Models\StagedRow;
+use GP247\Front\Library\SeoUrlLifecycle;
 use GP247\Shop\Services\Catalog\WriteContext;
 
 /**
@@ -16,7 +18,7 @@ use GP247\Shop\Services\Catalog\WriteContext;
  *
  * @aidlc-unit data-import
  * @aidlc-story US-data-import-staging-validation, US-data-import-change-review, US-data-import-conflict-guard, US-data-import-id-mapping,
- *              US-data-import-order-history
+ *              US-data-import-order-history, US-data-import-seo-meta, US-data-import-legacy-url-redirect
  */
 final class Planner
 {
@@ -97,16 +99,22 @@ final class Planner
 
             return;
         }
+        [$flat, $warnings] = SeoCarryover::resolve($handler->seoType(), $values, $flat, $job, $handler->languages());
+        [$legacy, $legacyWarning] = $this->legacy($job, $handler, $values, $flat, $targetId);
+        $warnings += $legacyWarning;
 
         $diff = [];
         $version = null;
         $action = RowAction::CREATE;
         if ($targetId !== null) {
-            $current = (array) $handler->snapshot($job->store_id, $targetId, array_keys($flat));
+            $current = (array) $handler->state($job->store_id, $targetId, array_keys($flat));
             foreach ($flat as $field => $value) {
                 if ((string) ($current[$field] ?? '') !== (string) $value) {
                     $diff[$field] = ['before' => $current[$field] ?? '', 'after' => $value];
                 }
+            }
+            if ($legacy !== '') {
+                $diff[SeoCarryover::LEGACY_FIELD] = ['before' => '', 'after' => $legacy];
             }
             if ($diff === [] || !$job->option('update_existing', true)) {
                 $this->mark($row, RowAction::SKIP, $targetId);
@@ -122,15 +130,55 @@ final class Planner
             foreach ($flat as $field => $value) {
                 $diff[$field] = ['before' => null, 'after' => $value];
             }
+            if ($legacy !== '') {
+                $diff[SeoCarryover::LEGACY_FIELD] = ['before' => null, 'after' => $legacy];
+            }
         }
 
-        $errors = $handler->validate($ctx, $handler->payload($flat), $targetId);
+        $errors = $handler->check($ctx, $handler->writePayload($flat), $targetId);
         if ($errors !== []) {
             $this->mark($row, RowAction::ERROR, $targetId, errors: $errors);
 
             return;
         }
-        $this->mark($row, $action, $targetId, $version, self::withoutSecrets($diff), warnings: $handler->warnings($flat, $job) ?: null);
+        $this->mark($row, $action, $targetId, $version, self::withoutSecrets($diff), warnings: ($handler->warnings($flat, $job) + $warnings) ?: null);
+    }
+
+    /**
+     * The old address of the row when a 301 to the record would be written now, or why not.
+     *
+     * @param ImportJob $job
+     * @param Entity\EntityHandler $handler
+     * @param array<string, string> $values
+     * @param array<string, string> $flat
+     * @param string|null $targetId
+     * @return array{0: string, 1: array<string, string>} [path to redirect ('' = none), warning]
+     *
+     * @aidlc-story US-data-import-legacy-url-redirect
+     */
+    private function legacy(ImportJob $job, Entity\EntityHandler $handler, array $values, array $flat, ?string $targetId): array
+    {
+        $type = $handler->seoType();
+        if (!SeoCarryover::legacySupported($type)) {
+            return ['', []];
+        }
+        $path = SeoCarryover::legacyPath($values, $job);
+        if ($path === '') {
+            return ['', []];
+        }
+        if (str_contains($path, '?')) {
+            return ['', ['legacy_skipped' => self::message('warning.legacy_skipped', ['path' => mb_substr($path, 0, 150), 'reason' => self::message('legacy.has_query')])]];
+        }
+        $alias = (string) ($flat['alias'] ?? ($targetId !== null ? ($handler->find($job->store_id, $targetId)?->alias ?? '') : ''));
+        $reason = SeoCarryover::checkLegacy($type, $job->store_id, $path, $alias);
+        if ($reason === SeoUrlLifecycle::LEGACY_OK) {
+            return [$path, []];
+        }
+        if ($reason === SeoUrlLifecycle::LEGACY_ALREADY_REDIRECTED) {
+            return ['', []];
+        }
+
+        return ['', ['legacy_skipped' => self::message('warning.legacy_skipped', ['path' => mb_substr($path, 0, 150), 'reason' => self::message('legacy.' . $reason)])]];
     }
 
     /**

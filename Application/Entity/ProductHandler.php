@@ -39,6 +39,27 @@ class ProductHandler extends EntityHandler
         return ProductWriter::TEXT_FIELDS;
     }
 
+    /** @return string Products have their own SEO values in the base. */
+    public function seoType(): ?string
+    {
+        return 'product';
+    }
+
+    /**
+     * The product itself, for a row that only changes SEO values.
+     *
+     * @param string $store
+     * @param string $id
+     * @return Model|null
+     *
+     * @aidlc-unit data-import
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function find(string $store, string $id): ?Model
+    {
+        return ShopProduct::where('store_id', $store)->find($id);
+    }
+
     public function naturalKeyField(): string
     {
         return 'sku';

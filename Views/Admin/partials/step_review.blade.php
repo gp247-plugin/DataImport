@@ -17,6 +17,10 @@
         <x-gp247::stat-card :label="gp247_language_render($l.'action.'.$key)" :value="number_format((int) ($counts[$key] ?? 0))" :icon="$icon" :color="$cardColors[$key]" data-testid="data-import-review-count-{{ $key }}" />
     @endforeach
 </div>
+{{-- 301 from the old addresses of the previous platform (US-data-import-legacy-url-redirect). --}}
+@if ((int) ($counts['redirect_planned'] ?? 0) + (int) ($counts['redirect_unplanned'] ?? 0) > 0)
+    <x-gp247::alert type="info" class="mt-4" data-testid="data-import-review-count-redirect">{{ gp247_language_render($l.'review.redirects', ['planned' => number_format((int) ($counts['redirect_planned'] ?? 0)), 'skipped' => number_format((int) ($counts['redirect_unplanned'] ?? 0))]) }}</x-gp247::alert>
+@endif
 
 @if ($canWork && $rows !== null)
     <x-gp247::card :title="gp247_language_render($l.'review.rows')">

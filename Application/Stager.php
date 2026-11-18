@@ -92,7 +92,12 @@ final class Stager
                 if ($field === null || !isset($targets[$field])) {
                     continue;
                 }
-                $values[$field] = $this->normalise($cell, isset($codes[explode(':', $field)[0]]));
+                $value = $this->normalise($cell, isset($codes[explode(':', $field)[0]]));
+                // WHY: two columns may feed one field (Yoast and Rank Math titles); an empty one must not erase the other.
+                if ($value === '' && ($values[$field] ?? '') !== '') {
+                    continue;
+                }
+                $values[$field] = $value;
             }
         }
         $json = json_encode($values, JSON_UNESCAPED_UNICODE);

@@ -26,6 +26,21 @@ abstract class NamedRecordHandler extends EntityHandler
     /** @return string Product column that references this record. */
     abstract protected function productColumn(): string;
 
+    /**
+     * The brand / supplier itself, for a row that only changes SEO values.
+     *
+     * @param string $store
+     * @param string $id
+     * @return Model|null
+     *
+     * @aidlc-unit data-import
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function find(string $store, string $id): ?Model
+    {
+        return $this->modelClass()::where('store_id', $store)->find($id);
+    }
+
     public function naturalKeyField(): string
     {
         return 'alias';

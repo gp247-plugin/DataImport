@@ -165,6 +165,10 @@ class ImportDetail extends GP247AdminComponent
         if ($this->language !== '') {
             $options['language'] = $this->language;
         }
+        if ($this->preset !== '') {
+            // The preset's own data (old-address pattern) is read back from its name; ImportService drops an unknown name.
+            $options['preset'] = $this->preset;
+        }
         if ($job->entity === 'order' && isset(Presets::all()[$this->preset])) {
             // WHY from the preset name: the statuses of a preset are data of the plugin, never values sent by the screen.
             $options['statuses'] = Presets::apply($this->preset, $job->entity, $this->headers($job))['statuses'];

@@ -39,7 +39,7 @@ final class ImportService
      * @param string $source Name of the source system (key of the id map), e.g. "woocommerce".
      * @param string $path File to import (copied; the original is not touched).
      * @param array<string, string> $columns Source header => target field; empty = headers that equal a target name.
-     * @param array<string, mixed> $options update_existing, emit_events, language, statuses (orders).
+     * @param array<string, mixed> $options update_existing, emit_events, language, statuses (orders), preset (file name of a known preset).
      * @param string|null $createdBy Admin id.
      * @param string|null $encoding Override of the detected character set.
      * @param string $delimiter
@@ -198,7 +198,7 @@ final class ImportService
      *
      * @param ImportJob $job
      * @param array<string, string> $columns Source header => target field; empty = headers that equal a target name.
-     * @param array<string, mixed> $options update_existing, emit_events, language, statuses (orders).
+     * @param array<string, mixed> $options update_existing, emit_events, language, statuses (orders), preset (file name of a known preset).
      * @param string|null $encoding
      * @param string|null $delimiter
      * @return void
@@ -217,10 +217,15 @@ final class ImportService
         if (isset($options['statuses']) && is_array($options['statuses'])) {
             $mapping['statuses'] = $this->statusMap($options['statuses']);
         }
+        $kept = array_intersect_key($options, array_flip(['update_existing', 'emit_events', 'language', 'preset']));
+        if (isset($kept['preset']) && !isset(Presets::all()[(string) $kept['preset']])) {
+            // WHY: the preset name selects plugin data (old-address pattern); an unknown name is dropped, never stored.
+            unset($kept['preset']);
+        }
         $job->forceFill([
             'phase' => JobPhase::STAGING,
             'mapping' => $mapping,
-            'options' => array_merge(['update_existing' => true, 'emit_events' => false], array_intersect_key($options, array_flip(['update_existing', 'emit_events', 'language']))),
+            'options' => array_merge(['update_existing' => true, 'emit_events' => false], $kept),
             'attempts' => 0,
         ])->save();
     }

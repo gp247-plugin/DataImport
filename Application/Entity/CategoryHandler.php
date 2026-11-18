@@ -37,6 +37,27 @@ class CategoryHandler extends EntityHandler
         return CategoryWriter::TEXT_FIELDS;
     }
 
+    /** @return string Categories have their own SEO values in the base. */
+    public function seoType(): ?string
+    {
+        return 'category';
+    }
+
+    /**
+     * The category itself, for a row that only changes SEO values.
+     *
+     * @param string $store
+     * @param string $id
+     * @return Model|null
+     *
+     * @aidlc-unit data-import
+     * @aidlc-story US-data-import-seo-meta
+     */
+    public function find(string $store, string $id): ?Model
+    {
+        return ShopCategory::where('store_id', $store)->find($id);
+    }
+
     public function naturalKeyField(): string
     {
         return 'alias';
